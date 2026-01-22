@@ -1,0 +1,60 @@
+# Root ignores
+/.DS_Store
+/.obsidian
+/Clippings
+/mimic_fhir.duckdb
+/physionet.org
+
+# Merged from Pipeline/.gitignore
+# Data files - keep locally, never commit
+Pipeline/Data/
+Pipeline/data/
+*.duckdb
+*.duckdb.wal
+*.parquet
+*.ndjson
+*.csv
+*.json.gz
+
+# Virtual environment
+Pipeline/.venv/
+Pipeline/venv/
+Pipeline/env/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Jupyter/Marimo checkpoints
+.ipynb_checkpoints/
+__marimo__/
+
+# MLflow
+Pipeline/mlruns/
+Pipeline/mlartifacts/
+
+# Delta Lake
+Pipeline/delta_lake/
+
+# IDE/Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Secrets/Config (if any)
+.env
+*.env
+credentials.json
+
+# Private archive (user notes, not for agents)
+Pipeline/.private/
