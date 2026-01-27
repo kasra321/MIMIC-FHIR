@@ -20,6 +20,10 @@ db/*.duckdb.wal
 *.ndjson.gz
 Documents/physionet.org/
 
+# Generated artifacts
+sql/
+output/
+
 # OS
 .DS_Store
 .DS_Store?
