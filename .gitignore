@@ -1,60 +1,41 @@
-# Root ignores
-/.DS_Store
-/.obsidian
-/Clippings
-/mimic_fhir.duckdb
-/physionet.org
-
-# Merged from Pipeline/.gitignore
-# Data files - keep locally, never commit
-Pipeline/Data/
-Pipeline/data/
-*.duckdb
-*.duckdb.wal
-*.parquet
-*.ndjson
-*.csv
-*.json.gz
-
-# Virtual environment
-Pipeline/.venv/
-Pipeline/venv/
-Pipeline/env/
-
-# Python artifacts
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-*.egg-info/
-.eggs/
-dist/
-build/
+.venv/
+env/
+venv/
+ENV/
+.env
+.pytest_cache/
+.coverage
+htmlcov/
 
-# Jupyter/Marimo checkpoints
-.ipynb_checkpoints/
-__marimo__/
+# Data and Databases
+Data/
+ndjson/
+db/*.duckdb
+db/*.duckdb.wal
+*.ndjson
+*.ndjson.gz
+Documents/physionet.org/
 
-# MLflow
-Pipeline/mlruns/
-Pipeline/mlartifacts/
-
-# Delta Lake
-Pipeline/delta_lake/
-
-# IDE/Editor
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# OS files
+# OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# Secrets/Config (if any)
-.env
-*.env
-credentials.json
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.cursor/
 
-# Private archive (user notes, not for agents)
-Pipeline/.private/
+# Obsidian
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json

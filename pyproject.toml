@@ -1,0 +1,9 @@
+[project]
+name = "mimic-fhir-mds"
+version = "0.1.0"
+description = "MIMIC-FHIR Modern Data Stack"
+requires-python = ">=3.11"
+dependencies = ["duckdb>=1.0.0"]
+
+[tool.uv]
+dev-dependencies = []
