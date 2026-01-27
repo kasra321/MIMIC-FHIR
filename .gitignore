@@ -40,3 +40,7 @@ Thumbs.db
 # Obsidian
 .obsidian/workspace.json
 .obsidian/workspace-mobile.json
+
+# temporary files
+sandbox.ipynb
+flatquack-feedback.md
