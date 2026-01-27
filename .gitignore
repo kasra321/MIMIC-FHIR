@@ -13,9 +13,6 @@ htmlcov/
 
 # Data and Databases
 Data/
-ndjson/
-db/*.duckdb
-db/*.duckdb.wal
 *.ndjson
 *.ndjson.gz
 Documents/physionet.org/

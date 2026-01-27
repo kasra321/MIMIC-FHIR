@@ -1,38 +1,20 @@
 """Bronze layer: Load FHIR NDJSON into DuckDB."""
 
-import gzip
-import shutil
 from pathlib import Path
 
 import duckdb
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 DATA_DIR = PROJECT_ROOT / "Data"
-NDJSON_DIR = PROJECT_ROOT / "ndjson"
-DB_DIR = PROJECT_ROOT / "db"
+OUTPUT_DIR = PROJECT_ROOT / "output" / "bronze"
 
 
-def unzip_ndjson():
-    """Decompress all NDJSON files."""
-    NDJSON_DIR.mkdir(exist_ok=True)
-    for src in DATA_DIR.glob("Mimic*.ndjson.gz"):
-        name = src.name.replace("Mimic", "").replace(".gz", "")
-        dst = NDJSON_DIR / name
-        if not dst.exists():
-            print(f"Unzipping {src.name}")
-            try:
-                with gzip.open(src, "rb") as f_in, open(dst, "wb") as f_out:
-                    shutil.copyfileobj(f_in, f_out)
-            except EOFError:
-                print(f"  Truncated: {src.name}")
+def load_to_duckdb(data_dir: Path = DATA_DIR, output_dir: Path = OUTPUT_DIR) -> None:
+    """Load NDJSON files from data_dir into a DuckDB database."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    conn = duckdb.connect(str(output_dir / "bronze.duckdb"))
 
-
-def load_to_duckdb():
-    """Load NDJSON files into DuckDB tables."""
-    DB_DIR.mkdir(exist_ok=True)
-    conn = duckdb.connect(str(DB_DIR / "bronze.duckdb"))
-
-    for ndjson in NDJSON_DIR.glob("*.ndjson"):
+    for ndjson in sorted(data_dir.glob("*.ndjson")):
         table = f"bronze_{ndjson.stem.lower()}"
         print(f"Loading {ndjson.name} -> {table}")
         try:
@@ -48,10 +30,5 @@ def load_to_duckdb():
     conn.close()
 
 
-def main():
-    unzip_ndjson()
-    load_to_duckdb()
-
-
 if __name__ == "__main__":
-    main()
+    load_to_duckdb()

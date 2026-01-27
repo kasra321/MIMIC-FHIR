@@ -60,12 +60,27 @@ def materialize(sql_dir: Path, output_dir: Path) -> None:
     for sql_file in sql_files:
         print(f"Executing {sql_file.name}")
         sql_text = sql_file.read_text()
+        statements = [s.strip() for s in sql_text.split(";") if s.strip()]
         try:
-            conn.execute(sql_text)
+            for stmt in statements:
+                conn.execute(stmt)
             print(f"  Done")
         except Exception as e:
             print(f"  Error: {e}")
     conn.close()
+
+    # Combine all parquet files into one
+    parts = sorted(output_dir.glob("*.parquet"))
+    if parts:
+        target = output_dir / "silver_vitals.parquet"
+        conn2 = duckdb.connect(":memory:")
+        selects = [f"SELECT * FROM read_parquet('{p}')" for p in parts]
+        conn2.execute(f"COPY ({' UNION ALL '.join(selects)}) TO '{target}' (FORMAT PARQUET)")
+        conn2.close()
+        for p in parts:
+            if p != target:
+                p.unlink()
+        print(f"Combined into {target.name}")
 
     print(f"Materialized {len(sql_files)} view(s) to {output_dir}")
 
