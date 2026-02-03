@@ -27,11 +27,12 @@ Python's data science libraries, primarily `pandas` and `matplotlib`, were used 
 
 ## 2.3. Study Phases
 
-Our exploratory data analysis was structured into four thematic phases, designed to build a comprehensive understanding of the dataset from foundational integrity to complex temporal dynamics.
+Our exploratory data analysis was structured into five thematic phases, designed to build a comprehensive understanding of the dataset from foundational integrity to complex temporal dynamics.
 
 1.  **Phase 1: Data Integrity and Value Distribution:** Initial checks to validate the data's quality, consistency, and the plausibility of its physiological values.
-2.  **Phase 2: Sparsity and Missingness Analysis:** A deep dive to quantify the extent and nature of missing data, a critical feature of all clinical datasets.
-3.  **Phase 3: Temporal and Sequential Characterization:** An analysis of the time dimension, focusing on the frequency of measurements and the length of patient encounters.
-4.  **Phase 4: Multivariate and Relational Analysis:** An exploration of the relationships between different vital signs (this phase is proposed in our discussion for future work).
+2.  **Phase 2a: Sparsity and Missingness Analysis:** A deep dive to quantify the extent and nature of missing data, a critical feature of all clinical datasets.
+3.  **Phase 2b: Missingness Mechanism Analysis:** Statistical testing to determine whether missingness is Missing Completely at Random (MCAR), Missing at Random (MAR), or Missing Not at Random (MNAR).
+4.  **Phase 3: Temporal and Sequential Characterization:** An analysis of the time dimension, focusing on the frequency of measurements and the length of patient encounters, performed comparatively for 6-vital and 5-vital configurations.
+5.  **Phase 4: Comparative Analysis (6 vs 5 Vitals):** Direct comparison of data quality metrics when including vs. excluding body temperature from the vital sign set.
 
 The subsequent sections will detail the specific methods employed within each of these phases.

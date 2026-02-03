@@ -24,3 +24,71 @@ While the overall completeness is high, the analysis of the "near-complete" time
 *   **Body Temperature (`LOINC: 8310-5`) accounted for 90.1% of the missing values.**
 
 The next most frequently missing vital, Oxygen Saturation, accounted for only 8.2% of instances, with all other vitals being absent less than 2% of the time. This finding indicates that the absence of a body temperature measurement is not a random event but a structural feature of the data collection process in the ED.
+
+## 3.3. Missingness Mechanism Analysis
+
+Given the finding that body temperature dominates missingness, we conducted formal statistical testing to characterize the mechanism.
+
+#### 3.3.1. Individual Vital Sign Missingness Rates
+
+| Vital Sign | Missingness Rate |
+|------------|------------------|
+| Body Temperature | 30.6% |
+| Oxygen Saturation | 8.0% |
+| Respiratory Rate | 5.6% |
+| Heart Rate | 4.4% |
+| Systolic BP | 0.0% |
+| Diastolic BP | 0.0% |
+
+Temperature's 30.6% missingness rate is dramatically higher than other vitals, with blood pressure showing perfect recording consistency.
+
+#### 3.3.2. MCAR Test Results (Chi-Square)
+
+| Metric | Value |
+|--------|-------|
+| Chi-square statistic | **97,562.66** |
+| Degrees of freedom | 1 |
+| P-value | **< 0.001** |
+| **Conclusion** | **REJECT MCAR** |
+
+**Interpretation:** The extremely low p-value (effectively zero) provides overwhelming statistical evidence that temperature missingness is NOT Missing Completely at Random. Systematic factors determine when temperature is recorded.
+
+#### 3.3.3. Missingness Correlation Analysis
+
+The correlation between temperature missingness and other vitals' missingness indicators was notably **weak (average correlation: 0.232)**. In contrast, other vitals (HR, RR, SpO2) showed **high inter-correlation**, indicating they are typically recorded together as part of the same measurement event. Temperature follows a different recording schedule.
+
+#### 3.3.4. Conditional Distribution Tests
+
+We compared vital value distributions when temperature was present vs. absent:
+
+| Vital Sign | T-test Result | Interpretation |
+|------------|---------------|----------------|
+| Heart Rate | p < 0.05 | **Significant difference** |
+| Respiratory Rate | p < 0.05 | **Significant difference** |
+| Oxygen Saturation | p < 0.05 | **Significant difference** |
+| Systolic BP | p < 0.05 | **Significant difference** |
+| Diastolic BP | p < 0.05 | **Significant difference** |
+
+**All 5 vitals showed statistically significant distribution differences** when temperature was present vs. absent. This provides strong evidence that temperature missingness is NOT Missing at Random (MAR)—the missing mechanism likely depends on unobserved factors (e.g., clinical indication, patient acuity).
+
+#### 3.3.5. Temporal Patterns
+
+Temperature presence rates showed modest but consistent patterns:
+*   Day hours (8am-6pm): **70.2%** presence
+*   Night hours (10pm-6am): **66.0%** presence
+*   Difference: 4.1 percentage points
+
+This suggests temperature recording follows clinical workflow patterns (nursing schedules, spot-check protocols) rather than continuous monitoring.
+
+#### 3.3.6. Median Time Delta Per Vital Sign
+
+| Vital Sign | Median Time Delta |
+|------------|-------------------|
+| Body Temperature | **145 min** |
+| Heart Rate | 94 min |
+| Respiratory Rate | 96 min |
+| Oxygen Saturation | 95 min |
+| Systolic BP | 88 min |
+| Diastolic BP | 88 min |
+
+Temperature has the longest median time delta (145 min vs. 88-96 min for other vitals), confirming it is measured less frequently—consistent with spot-check protocols vs. continuous bedside monitors.
