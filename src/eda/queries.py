@@ -1,6 +1,10 @@
 """SQL query registry for vital signs EDA."""
 
+from __future__ import annotations
+
 import pandas as pd
+
+from src.eda.vitals import VITALS_5
 
 QUERIES = {
     "schema": "DESCRIBE vitals",
@@ -26,8 +30,9 @@ QUERIES = {
             SELECT
                 encounter_id,
                 effective_datetime,
-                COUNT(DISTINCT loinc_code) as num_vitals
+                COUNT(DISTINCT loinc_code) {filter_clause} as num_vitals
             FROM vitals
+            {where_clause}
             GROUP BY encounter_id, effective_datetime
         )
         SELECT
@@ -296,39 +301,25 @@ QUERIES = {
             SELECT
                 encounter_id,
                 effective_datetime,
-                COUNT(DISTINCT loinc_code) as num_vitals,
-                COUNT(DISTINCT loinc_code) FILTER (WHERE loinc_code != '8310-5') as num_vitals_excl_temp
+                COUNT(DISTINCT loinc_code) {filter_clause} as num_vitals
             FROM vitals
             GROUP BY encounter_id, effective_datetime
         ),
         enc_counts AS (
             SELECT
                 encounter_id,
-                SUM(CASE WHEN num_vitals = 6 THEN 1 ELSE 0 END) as complete_6v,
-                SUM(CASE WHEN num_vitals_excl_temp = 5 THEN 1 ELSE 0 END) as complete_5v
+                SUM(CASE WHEN num_vitals = {required_count} THEN 1 ELSE 0 END) as complete_ts
             FROM timestamp_vitals
             GROUP BY encounter_id
         )
         SELECT
-            '6 Vitals (with Temp)' as approach,
             COUNT(*) as n_encounters,
-            SUM(CASE WHEN complete_6v >= 2 THEN 1 ELSE 0 END) as encounters_usable,
-            ROUND(100.0 * SUM(CASE WHEN complete_6v >= 2 THEN 1 ELSE 0 END) / COUNT(*), 1) as pct_usable,
-            ROUND(PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY complete_6v), 0) as p25,
-            ROUND(PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY complete_6v), 0) as p50,
-            ROUND(PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY complete_6v), 0) as p75,
-            ROUND(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY complete_6v), 0) as p95
-        FROM enc_counts
-        UNION ALL
-        SELECT
-            '5 Vitals (excl. Temp)',
-            COUNT(*),
-            SUM(CASE WHEN complete_5v >= 2 THEN 1 ELSE 0 END),
-            ROUND(100.0 * SUM(CASE WHEN complete_5v >= 2 THEN 1 ELSE 0 END) / COUNT(*), 1),
-            ROUND(PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY complete_5v), 0),
-            ROUND(PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY complete_5v), 0),
-            ROUND(PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY complete_5v), 0),
-            ROUND(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY complete_5v), 0)
+            SUM(CASE WHEN complete_ts >= 2 THEN 1 ELSE 0 END) as encounters_usable,
+            ROUND(100.0 * SUM(CASE WHEN complete_ts >= 2 THEN 1 ELSE 0 END) / COUNT(*), 1) as pct_usable,
+            ROUND(PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY complete_ts), 0) as p25,
+            ROUND(PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY complete_ts), 0) as p50,
+            ROUND(PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY complete_ts), 0) as p75,
+            ROUND(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY complete_ts), 0) as p95
         FROM enc_counts
     """,
 
@@ -337,14 +328,14 @@ QUERIES = {
             SELECT
                 encounter_id,
                 effective_datetime,
-                COUNT(DISTINCT loinc_code) FILTER (WHERE loinc_code != '8310-5') as num_vitals_excl_temp
+                COUNT(DISTINCT loinc_code) {filter_clause} as num_vitals
             FROM vitals
             GROUP BY encounter_id, effective_datetime
         ),
         enc_counts AS (
             SELECT
                 encounter_id,
-                SUM(CASE WHEN num_vitals_excl_temp = 5 THEN 1 ELSE 0 END) as complete_ts
+                SUM(CASE WHEN num_vitals = {required_count} THEN 1 ELSE 0 END) as complete_ts
             FROM timestamp_vitals
             GROUP BY encounter_id
         )
@@ -379,14 +370,14 @@ QUERIES = {
             SELECT
                 encounter_id,
                 effective_datetime::TIMESTAMP as ts,
-                COUNT(DISTINCT loinc_code) FILTER (WHERE loinc_code != '8310-5') as num_vitals_excl_temp
+                COUNT(DISTINCT loinc_code) {filter_clause} as num_vitals
             FROM vitals
             GROUP BY encounter_id, effective_datetime
         ),
         complete_ts AS (
             SELECT encounter_id, ts
             FROM timestamp_vitals
-            WHERE num_vitals_excl_temp = 5
+            WHERE num_vitals = {required_count}
         ),
         deltas AS (
             SELECT
@@ -437,59 +428,67 @@ QUERIES = {
     """,
 
     "comparison_6v_vs_5v": """
-        WITH ts_6v AS (
-            SELECT encounter_id, effective_datetime::TIMESTAMP as ts
+        WITH ts AS (
+            SELECT
+                encounter_id,
+                effective_datetime::TIMESTAMP as ts,
+                COUNT(DISTINCT loinc_code) {filter_clause} as num_vitals
             FROM vitals
             GROUP BY encounter_id, effective_datetime
-            HAVING COUNT(DISTINCT loinc_code) = 6
         ),
-        ts_5v AS (
-            SELECT encounter_id, effective_datetime::TIMESTAMP as ts
-            FROM vitals
-            GROUP BY encounter_id, effective_datetime
-            HAVING COUNT(DISTINCT loinc_code) FILTER (WHERE loinc_code != '8310-5') = 5
+        complete_ts AS (
+            SELECT encounter_id, ts
+            FROM ts
+            WHERE num_vitals = {required_count}
         ),
-        deltas_6v AS (
+        deltas AS (
             SELECT EXTRACT(EPOCH FROM (ts - LAG(ts) OVER (PARTITION BY encounter_id ORDER BY ts))) / 60.0 as delta_min
-            FROM ts_6v
-        ),
-        deltas_5v AS (
-            SELECT EXTRACT(EPOCH FROM (ts - LAG(ts) OVER (PARTITION BY encounter_id ORDER BY ts))) / 60.0 as delta_min
-            FROM ts_5v
+            FROM complete_ts
         )
         SELECT
-            '6 Vitals (with Temp)' as approach,
-            (SELECT COUNT(*) FROM ts_6v) as n_timestamps,
-            (SELECT COUNT(*) FROM deltas_6v WHERE delta_min IS NOT NULL) as n_deltas,
-            (SELECT ROUND(PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY delta_min), 0) FROM deltas_6v WHERE delta_min IS NOT NULL) as median_delta
-        UNION ALL
-        SELECT
-            '5 Vitals (excl. Temp)',
-            (SELECT COUNT(*) FROM ts_5v),
-            (SELECT COUNT(*) FROM deltas_5v WHERE delta_min IS NOT NULL),
-            (SELECT ROUND(PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY delta_min), 0) FROM deltas_5v WHERE delta_min IS NOT NULL)
+            (SELECT COUNT(*) FROM complete_ts) as n_timestamps,
+            (SELECT COUNT(*) FROM deltas WHERE delta_min IS NOT NULL) as n_deltas,
+            (SELECT ROUND(PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY delta_min), 0) FROM deltas WHERE delta_min IS NOT NULL) as median_delta
     """,
 }
 
 
-def run_query(conn, query_name: str, **params) -> pd.DataFrame:
+def run_query(
+    conn, query_name: str, vitals: dict | None = None, **params
+) -> pd.DataFrame:
     """Look up a named SQL query, apply parameter substitution, and execute.
 
-    Usage in notebook:
-        df = run_query(conn, "time_deltas", exclude_temp=True)
-        df = run_query(conn, "missingness_matrix")
+    Parameters
+    ----------
+    conn : duckdb connection
+    query_name : key into QUERIES dict
+    vitals : optional dict mapping loinc_code -> name.  When provided the
+        ``{filter_clause}`` placeholder becomes a FILTER restricting to those
+        codes and ``{required_count}`` becomes ``len(vitals)``.  When *None*
+        the full dataset (6 vitals) is assumed unless ``exclude_temp`` is set.
+    **params : legacy keyword args.  ``exclude_temp=True`` is converted to
+        ``vitals=VITALS_5`` for backward compatibility.
     """
     sql = QUERIES[query_name]
 
-    # Apply parameter-based SQL variations
-    if params.get("exclude_temp"):
+    # Backward compatibility: translate exclude_temp into vitals dict
+    if vitals is None and params.get("exclude_temp"):
+        vitals = VITALS_5
+
+    if vitals is not None:
+        codes = ", ".join(f"'{c}'" for c in vitals)
         sql = sql.replace(
             "{filter_clause}",
-            "FILTER (WHERE loinc_code != '8310-5')",
+            f"FILTER (WHERE loinc_code IN ({codes}))",
         )
-        sql = sql.replace("{required_count}", "5")
+        sql = sql.replace("{required_count}", str(len(vitals)))
+        sql = sql.replace(
+            "{where_clause}",
+            f"WHERE loinc_code IN ({codes})",
+        )
     else:
         sql = sql.replace("{filter_clause}", "")
         sql = sql.replace("{required_count}", "6")
+        sql = sql.replace("{where_clause}", "")
 
     return conn.execute(sql).df()

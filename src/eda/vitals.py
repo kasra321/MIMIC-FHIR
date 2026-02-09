@@ -27,6 +27,12 @@ VITALS_6 = {
 
 VITALS_5 = {k: v for k, v in VITALS_6.items() if k != "8310-5"}
 
+VITALS_3 = {
+    "8867-4": "heart_rate",
+    "8480-6": "systolic_bp",
+    "8462-4": "diastolic_bp",
+}
+
 DISPLAY_NAMES = {
     "body_temperature": "Temp",
     "heart_rate": "HR",
@@ -119,13 +125,16 @@ def decode_missingness_pattern(pattern: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-def plot_completeness_bar(df: pd.DataFrame, ax: plt.Axes | None = None):
+def plot_completeness_bar(
+    df: pd.DataFrame, ax: plt.Axes | None = None, n_vitals: int = 6
+):
     """Color-coded bar chart of timestamp completeness with % labels."""
     if ax is None:
         _, ax = plt.subplots(figsize=(10, 5))
 
     colors = [
-        "#ff6b6b" if x < 5 else ("#ffd93d" if x == 5 else "#6bcb77")
+        "#ff6b6b" if x < n_vitals - 1
+        else ("#ffd93d" if x == n_vitals - 1 else "#6bcb77")
         for x in df["num_vitals"]
     ]
     bars = ax.bar(
@@ -146,9 +155,12 @@ def plot_completeness_bar(df: pd.DataFrame, ax: plt.Axes | None = None):
             fontweight="bold",
         )
     legend_elements = [
-        Patch(facecolor="#6bcb77", edgecolor="black", label="Complete (6 vitals)"),
-        Patch(facecolor="#ffd93d", edgecolor="black", label="5 of 6 vitals"),
-        Patch(facecolor="#ff6b6b", edgecolor="black", label="<5 vitals"),
+        Patch(facecolor="#6bcb77", edgecolor="black",
+              label=f"Complete ({n_vitals} vitals)"),
+        Patch(facecolor="#ffd93d", edgecolor="black",
+              label=f"{n_vitals - 1} of {n_vitals}"),
+        Patch(facecolor="#ff6b6b", edgecolor="black",
+              label=f"<{n_vitals - 1}"),
     ]
     ax.legend(handles=legend_elements, loc="upper left")
     return ax
