@@ -25,7 +25,14 @@ VITALS_6 = {
     "8462-4": "diastolic_bp",
 }
 
-VITALS_5 = {k: v for k, v in VITALS_6.items() if k != "8310-5"}
+VITALS_5 = {   
+    "8867-4": "heart_rate",
+    "9279-1": "respiratory_rate",
+    "2708-6": "oxygen_saturation",
+    "8480-6": "systolic_bp",
+    "8462-4": "diastolic_bp",
+}
+
 
 VITALS_3 = {
     "8867-4": "heart_rate",

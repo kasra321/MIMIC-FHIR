@@ -450,6 +450,62 @@ QUERIES = {
             (SELECT COUNT(*) FROM deltas WHERE delta_min IS NOT NULL) as n_deltas,
             (SELECT ROUND(PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY delta_min), 0) FROM deltas WHERE delta_min IS NOT NULL) as median_delta
     """,
+
+    "seq_length_vs_delta": """
+        WITH timestamp_vitals AS (
+            SELECT encounter_id, effective_datetime::TIMESTAMP as ts,
+                   COUNT(DISTINCT loinc_code) {filter_clause} as num_vitals
+            FROM vitals
+            GROUP BY encounter_id, effective_datetime
+        ),
+        complete_ts AS (
+            SELECT encounter_id, ts
+            FROM timestamp_vitals WHERE num_vitals = {required_count}
+        ),
+        enc_counts AS (
+            SELECT encounter_id, COUNT(*) as n_timesteps
+            FROM complete_ts GROUP BY encounter_id
+        ),
+        deltas AS (
+            SELECT encounter_id,
+                   EXTRACT(EPOCH FROM (ts - LAG(ts) OVER (
+                       PARTITION BY encounter_id ORDER BY ts))) / 60.0 as delta_min
+            FROM complete_ts
+        ),
+        encounter_avg AS (
+            SELECT d.encounter_id, e.n_timesteps, AVG(d.delta_min) as avg_delta
+            FROM deltas d JOIN enc_counts e ON d.encounter_id = e.encounter_id
+            WHERE d.delta_min IS NOT NULL
+            GROUP BY d.encounter_id, e.n_timesteps
+        )
+        SELECT n_timesteps,
+               ROUND(AVG(avg_delta), 1)    as mean_avg_delta,
+               ROUND(STDDEV(avg_delta), 1) as std_avg_delta,
+               COUNT(*)                     as n_encounters
+        FROM encounter_avg
+        GROUP BY n_timesteps
+        ORDER BY n_timesteps
+    """,
+
+    "seq_length_distribution": """
+        WITH timestamp_vitals AS (
+            SELECT encounter_id, effective_datetime,
+                   COUNT(DISTINCT loinc_code) {filter_clause} as num_vitals
+            FROM vitals
+            GROUP BY encounter_id, effective_datetime
+        ),
+        enc_counts AS (
+            SELECT encounter_id,
+                   SUM(CASE WHEN num_vitals = {required_count} THEN 1 ELSE 0 END) as n_timesteps
+            FROM timestamp_vitals
+            GROUP BY encounter_id
+        )
+        SELECT n_timesteps, COUNT(*) as n_encounters
+        FROM enc_counts
+        WHERE n_timesteps >= 1
+        GROUP BY n_timesteps
+        ORDER BY n_timesteps
+    """,
 }
 
 
@@ -471,9 +527,9 @@ def run_query(
     """
     sql = QUERIES[query_name]
 
-    # Backward compatibility: translate exclude_temp into vitals dict
-    if vitals is None and params.get("exclude_temp"):
-        vitals = VITALS_5
+    # # Backward compatibility: translate exclude_temp into vitals dict
+    # if vitals is None and params.get("exclude_temp"):
+    #     vitals = VITALS_5
 
     if vitals is not None:
         codes = ", ".join(f"'{c}'" for c in vitals)
