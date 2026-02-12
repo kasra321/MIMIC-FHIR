@@ -127,6 +127,24 @@ def decode_missingness_pattern(pattern: str) -> str:
     return f"Missing: {', '.join(missing)}"
 
 
+def filter_complete(df: pd.DataFrame, n_col: str, required: int) -> pd.DataFrame:
+    """Filter to complete timestamps and recompute deltas + positions."""
+    complete = (
+        df[df[n_col] == required]
+        .sort_values(["encounter_id", "effective_datetime"])
+        .copy()
+    )
+    complete["delta_min"] = (
+        complete.groupby("encounter_id")["effective_datetime"]
+        .diff().dt.total_seconds() / 60
+    )
+    complete["obs_position"] = complete.groupby("encounter_id").cumcount() + 1
+    complete["total_obs_in_encounter"] = complete.groupby("encounter_id")[
+        "encounter_id"
+    ].transform("count")
+    return complete
+
+
 # ---------------------------------------------------------------------------
 # Plotting helpers
 # ---------------------------------------------------------------------------
