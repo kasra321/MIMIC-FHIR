@@ -1,6 +1,13 @@
 services:
-  pipeline:
+  ingest:
     build: .
+    entrypoint: ["/app/run_pipeline.sh", "ingest"]
     volumes:
       - ./data/raw:/data/raw:ro
+      - ./data/warehouse:/data/warehouse
+
+  transform_vitals_eda:
+    build: .
+    entrypoint: ["/app/run_pipeline.sh", "transform_vitals_eda"]
+    volumes:
       - ./data/warehouse:/data/warehouse

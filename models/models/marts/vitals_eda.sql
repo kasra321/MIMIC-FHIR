@@ -1,5 +1,5 @@
 MODEL (
-  name marts.eda_vitals,
+  name marts.vitals_eda,
   kind FULL,
   grain [encounter_id, patient_id, effective_datetime]
 );

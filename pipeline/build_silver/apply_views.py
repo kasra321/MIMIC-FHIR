@@ -6,6 +6,10 @@ import glob
 db_path = os.environ["DUCKDB_PATH"]
 con = duckdb.connect(db_path)
 
+con.execute("SET memory_limit = '4GB';")
+con.execute("SET threads = 2;")
+con.execute("SET preserve_insertion_order = false;")
+
 con.execute("CREATE SCHEMA IF NOT EXISTS silver;")
 
 sql_files = glob.glob(

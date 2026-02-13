@@ -31,11 +31,14 @@ for file_path in sorted(ndjson_files):
 
     selects.append(f"""
     SELECT
-        json_extract_string(json, '$.resourceType') AS resource_type,
-        json_extract_string(json, '$.id') AS resource_id,
-        json AS resource,
+        json_extract_string(raw, '$.resourceType') AS resource_type,
+        json_extract_string(raw, '$.id') AS resource_id,
+        raw AS resource,
         '{filename}' AS source_file
-    FROM read_json_auto('{file_path}', format='newline_delimited')
+    FROM (
+        SELECT column0 AS raw
+        FROM read_csv('{file_path}', delim=NULL, header=false, auto_detect=false, columns={{'column0': 'VARCHAR'}})
+    )
     """)
     print(f"  Queued {filename}")
 

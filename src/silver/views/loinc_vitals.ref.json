@@ -1,8 +1,0 @@
-{
-  "8310-5": { "name": "body_temperature", "display": "Body temperature" },
-  "8867-4": { "name": "heart_rate", "display": "Heart rate" },
-  "9279-1": { "name": "respiratory_rate", "display": "Respiratory rate" },
-  "2708-6": { "name": "oxygen_saturation", "display": "Oxygen saturation" },
-  "8480-6": { "name": "systolic_bp", "display": "Systolic blood pressure" },
-  "8462-4": { "name": "diastolic_bp", "display": "Diastolic blood pressure" }
-}

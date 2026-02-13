@@ -1,4 +1,4 @@
-- name: silver.observation_vitals
+- name: silver.obs_vitals
   columns:
     resource_id: varchar
     patient_id: varchar

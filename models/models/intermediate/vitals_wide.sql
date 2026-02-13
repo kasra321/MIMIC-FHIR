@@ -20,5 +20,5 @@ SELECT
     MAX(CASE WHEN loinc_code = '2708-6' THEN 1 ELSE 0 END) AS spo2_present,
     MAX(CASE WHEN loinc_code = '8480-6' THEN 1 ELSE 0 END) AS sbp_present,
     MAX(CASE WHEN loinc_code = '8462-4' THEN 1 ELSE 0 END) AS dbp_present
-FROM silver.observation_vitals
+FROM silver.obs_vitals
 GROUP BY encounter_id, patient_id, effective_datetime
