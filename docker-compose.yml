@@ -1,0 +1,6 @@
+services:
+  pipeline:
+    build: .
+    volumes:
+      - ./data/raw:/data/raw:ro
+      - ./data/warehouse:/data/warehouse

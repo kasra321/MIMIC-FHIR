@@ -160,7 +160,7 @@ Our analysis of timestamp completeness yielded an encouraging result. We found t
 
 Cumulatively, **93.3%** of all recorded timestamps provide a nearly complete physiological snapshot of the patient at that moment in time. Timestamps with four or fewer vitals account for less than 7% of the data, suggesting that when data is captured, it is generally captured comprehensively.
 
-![Figure 1: Distribution of vitals recorded per timestamp. The majority of timestamps (65.9%) contain all 6 vital signs, with an additional 27.4% containing 5 vitals.](figures/fig01_vitals_per_timestamp_distribution.png)
+![Figure 1: Distribution of vitals recorded per timestamp. The majority of timestamps (65.9%) contain all 6 vital signs, with an additional 27.4% containing 5 vitals.](fig01_vitals_per_timestamp_distribution.png)
 
 *Figure 1: Distribution of vitals recorded per timestamp, showing the high prevalence of complete measurement sets.*
 
@@ -172,7 +172,7 @@ While the overall completeness is high, the analysis of the "near-complete" time
 
 The next most frequently missing vital, Oxygen Saturation, accounted for only 8.2% of instances, with all other vitals being absent less than 2% of the time. This finding indicates that the absence of a body temperature measurement is not a random event but a structural feature of the data collection process in the ED.
 
-![Figure 2: Breakdown of which vital sign is missing when 5 of 6 vitals are recorded. Temperature dominates at 90.1%.](figures/fig02_missing_vital_breakdown.png)
+![Figure 2: Breakdown of which vital sign is missing when 5 of 6 vitals are recorded. Temperature dominates at 90.1%.](fig02_missing_vital_breakdown.png)
 
 *Figure 2: Most commonly missing vital sign in near-complete timestamps (5/6 recorded). Body temperature accounts for 90.1% of the missing values.*
 
@@ -208,7 +208,7 @@ Temperature's 30.6% missingness rate is dramatically higher than other vitals, w
 
 The correlation between temperature missingness and other vitals' missingness indicators was notably **weak (average correlation: 0.232)**. In contrast, other vitals (HR, RR, SpO2) showed **high inter-correlation**, indicating they are typically recorded together as part of the same measurement event. Temperature follows a different recording schedule.
 
-![Figure 3: Missingness correlation matrix showing weak correlation between temperature missingness and other vitals.](figures/fig03_missingness_correlation_matrix.png)
+![Figure 3: Missingness correlation matrix showing weak correlation between temperature missingness and other vitals.](fig03_missingness_correlation_matrix.png)
 
 *Figure 3: Correlation matrix of missingness indicators. Temperature shows weak correlation with other vitals, which are highly inter-correlated.*
 
@@ -236,7 +236,7 @@ Temperature presence rates showed modest but consistent patterns:
 
 This suggests temperature recording follows clinical workflow patterns (nursing schedules, spot-check protocols) rather than continuous monitoring.
 
-![Figure 4: Temporal patterns of vital sign presence across hours of the day.](figures/fig09_temporal_patterns_hour_of_day.png)
+![Figure 4: Temporal patterns of vital sign presence across hours of the day.](fig09_temporal_patterns_hour_of_day.png)
 
 *Figure 4: Vital sign presence rates by hour of day, showing temporal patterns in recording behavior.*
 
@@ -269,7 +269,7 @@ Based on the missingness mechanism analysis, we evaluated the impact of excludin
 
 **Key Finding:** Excluding temperature provides **471,200 additional complete timestamps** and **468,800 additional usable time deltas** for temporal analysis. This represents a substantial improvement in data availability without requiring imputation.
 
-![Figure 5: Comparison of completeness metrics between 6-vital and 5-vital configurations.](figures/fig08_completeness_comparison_5v_6v.png)
+![Figure 5: Comparison of completeness metrics between 6-vital and 5-vital configurations.](fig08_completeness_comparison_5v_6v.png)
 
 *Figure 5: Comparison of data completeness between configurations requiring 6 vitals vs. 5 vitals (excluding temperature).*
 
@@ -288,7 +288,7 @@ While the data is often complete at any given timestamp, the time *between* thes
 
 **Key Finding:** Excluding temperature reduces the median time gap from **162 minutes (2.7 hours) to 105 minutes (1.75 hours)**—a 35% improvement in temporal resolution.
 
-![Figure 6: Distribution of time deltas between complete timestamps using 5 vitals (excluding temperature).](figures/fig11_time_delta_distribution_5v.png)
+![Figure 6: Distribution of time deltas between complete timestamps using 5 vitals (excluding temperature).](fig11_time_delta_distribution_5v.png)
 
 *Figure 6: Distribution of time deltas between complete 5-vital timestamps. The median delta of 105 minutes represents a 35% improvement over the 6-vital configuration.*
 
@@ -308,7 +308,7 @@ The pattern of time deltas within encounters differs between configurations:
 
 This reversal suggests that temperature's infrequent recording introduces artificial gaps early in encounters when continuous monitor vitals are already available.
 
-![Figure 7: Average time delta by position within encounters.](figures/fig12_avg_delta_by_position.png)
+![Figure 7: Average time delta by position within encounters.](fig12_avg_delta_by_position.png)
 
 *Figure 7: Average time delta by observation position within encounters, showing how temporal patterns differ between configurations.*
 
@@ -335,7 +335,7 @@ This reversal suggests that temperature's infrequent recording introduces artifi
 
 With 6 vitals, the mean number of complete timestamps per encounter is only **3.3**, and nearly 60% of encounters have ≤3 observations. This limits the ability of sequential models to learn complex temporal patterns.
 
-![Figure 8: Sequence length distribution using 5 vitals.](figures/fig16_sequence_length_distribution_5v.png)
+![Figure 8: Sequence length distribution using 5 vitals.](fig16_sequence_length_distribution_5v.png)
 
 *Figure 8: Distribution of sequence lengths (complete timestamps per encounter) using 5 vitals. The 5-vital configuration provides longer sequences suitable for sequential modeling.*
 
@@ -356,7 +356,7 @@ Using 5 vitals increases:
 
 **Conclusion from Results:** Excluding temperature provides substantially more data with denser temporal coverage, without requiring imputation or introducing bias. This is justified by the MCAR test rejection and the systematic (non-random) nature of temperature missingness.
 
-![Figure 9: Timestep coverage comparison between 6-vital and 5-vital configurations.](figures/fig17_timestep_coverage_comparison.png)
+![Figure 9: Timestep coverage comparison between 6-vital and 5-vital configurations.](fig17_timestep_coverage_comparison.png)
 
 *Figure 9: Comparison of timestep coverage at various fixed intervals, showing improved coverage with the 5-vital configuration.*
 

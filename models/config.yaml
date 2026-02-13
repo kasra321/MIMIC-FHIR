@@ -1,0 +1,7 @@
+gateways:
+  local:
+    connection:
+      type: duckdb
+      database: "{{ env_var('DUCKDB_PATH', 'data/warehouse/mimic_fhir.duckdb') }}"
+
+default_gateway: local

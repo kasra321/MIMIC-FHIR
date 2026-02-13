@@ -1,0 +1,9 @@
+- name: silver.observation_vitals
+  columns:
+    resource_id: varchar
+    patient_id: varchar
+    encounter_id: varchar
+    effective_datetime: timestamp
+    loinc_code: varchar
+    value: double
+    unit: varchar

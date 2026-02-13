@@ -1,0 +1,11 @@
+{
+	"nodes":[
+		{"id":"a0546d85fb516085","x":-600,"y":-800,"width":600,"height":890,"type":"file","file":"Documents/Final Report/00_toc.md"},
+		{"id":"4cd989f96c82f16a","x":920,"y":-560,"width":880,"height":540,"type":"file","file":"Documents/Final Report/04_architecture_justification.md"},
+		{"id":"4544ffc4a3b05973","x":280,"y":-384,"width":250,"height":59,"type":"text","text":"Methodology"}
+	],
+	"edges":[
+		{"id":"31dc09417c6304d2","fromNode":"a0546d85fb516085","fromSide":"right","toNode":"4544ffc4a3b05973","toSide":"left"},
+		{"id":"12ee9a1d4f7bb5f5","fromNode":"4544ffc4a3b05973","fromSide":"right","toNode":"4cd989f96c82f16a","toSide":"left"}
+	]
+}
