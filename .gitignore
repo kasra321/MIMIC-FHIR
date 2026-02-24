@@ -39,10 +39,6 @@ Thumbs.db
 *.swo
 .cursor/
 
-# Claude Code (tracked on wiki-setup branch)
-.claude/
-CLAUDE.md
-.mcp.json
 
 # Local scratch space
 local/*
