@@ -141,6 +141,11 @@ No formal test framework. Validation is done via:
 
 ## Git Workflow
 
+### Branch Strategy
+- **`main`** — clean, public-facing branch. No dev session files, no Claude Code config. Merges require user approval.
+- **`active`** — local development tree. Tracks Claude Code files (`CLAUDE.md`, `.claude/`, `.mcp.json`) and serves as the working branch for day-to-day development sessions. This is where you should be by default.
+- **Feature branches** — branch off `active` (or `main` for releases) with a name derived from the issue: `<issue#>-short-description` (e.g., `12-synthea-adapter`). One feature or fix per branch.
+
 ### Commits
 - Write descriptive one-liner commit messages that explain *why*, not *what* (the diff shows what)
 - Commit at meaningful intervals — each commit should represent one logical unit of work
@@ -148,11 +153,9 @@ No formal test framework. Validation is done via:
 
 ### Branches and Issues
 - Open a GitHub Issue before starting any new feature or non-trivial change — **ask user before creating issues**
-- Branch off `main` with a name derived from the issue: `<issue#>-short-description` (e.g., `12-synthea-adapter`)
-- Keep branches focused — one feature or fix per branch
 - **Always ask user before merging into `main`** or creating PRs that target `main`
-- Commits, pushes, and restores on feature branches are fine without verification
-- Temp branches off `main` for testing or integration that won't merge back or move `main`'s HEAD are also fine without verification
+- Commits, pushes, and restores on `active` or feature branches are fine without verification
+- Temp branches for testing or integration that won't move `main`'s HEAD are also fine without verification
 
 ### Pushing
 - Push at meaningful intervals: end of a working session, before switching context, or when a logical milestone is reached
