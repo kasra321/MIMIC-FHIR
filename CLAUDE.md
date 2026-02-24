@@ -138,3 +138,28 @@ wiki/              → GitHub Wiki submodule (Obsidian vault)
 No formal test framework. Validation is done via:
 - `pipeline/validate_bronze.py` — Checks row counts, required columns, null rates (<5%)
 - Jupyter notebooks in `notebooks/` — EDA and pipeline verification
+
+## Git Workflow
+
+### Commits
+- Write descriptive one-liner commit messages that explain *why*, not *what* (the diff shows what)
+- Commit at meaningful intervals — each commit should represent one logical unit of work
+- Do not bundle unrelated changes in a single commit
+
+### Branches and Issues
+- Open a GitHub Issue before starting any new feature or non-trivial change — **ask user before creating issues**
+- Branch off `main` with a name derived from the issue: `<issue#>-short-description` (e.g., `12-synthea-adapter`)
+- Keep branches focused — one feature or fix per branch
+- **Always ask user before merging into `main`** or creating PRs that target `main`
+- Commits, pushes, and restores on feature branches are fine without verification
+- Temp branches off `main` for testing or integration that won't merge back or move `main`'s HEAD are also fine without verification
+
+### Pushing
+- Push at meaningful intervals: end of a working session, before switching context, or when a logical milestone is reached
+- Do not push broken or half-finished work to shared branches
+- Wiki submodule is pushed separately: `git -C wiki add . && git -C wiki commit -m "msg" && git -C wiki push`
+
+### General
+- Keep the working tree clean — do not commit scratch files, `.DS_Store`, or anything in `local/`
+- Use `.gitignore` to exclude generated artifacts and data files
+- Review `git diff` before committing to catch unintended changes

@@ -43,9 +43,8 @@ Thumbs.db
 local/*
 !local/.gitkeep
 
-# Obsidian
-.obsidian/workspace.json
-.obsidian/workspace-mobile.json
+# Obsidian (root vault config — wiki/.obsidian/ is tracked via submodule)
+.obsidian/
 
 # temporary files
 sandbox.ipynb
