@@ -6,8 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 MIMIC-FHIR-MDS is a medallion-architecture data pipeline that transforms MIMIC-IV FHIR NDJSON data into analysis-ready tables using DuckDB. It processes ~15GB of raw FHIR resources through Bronze (raw ingestion) → Silver (flattened vitals) → Gold (SQLMesh analytical models).
 
+## C4 Model Relationship
+
+A Structurizr C4 model lives in the separate `MIMIC C4` repo. It serves as a **planning and communication dashboard**, not a specification. The codebase is the source of truth — it prioritizes stability and robustness. When the C4 model and codebase disagree, investigate case-by-case: the code usually wins, but C4 may surface valid design intent that hasn't been implemented yet.
+
 ## Structure
 
+- `ingestion/` — bronze loader + validation (source-agnostic FHIR ingestion)
+- `pipeline/build_silver/` — silver SQL transformations
+- `models/` — SQLMesh gold layer
 - `local/` — untracked scratch space for local-only files
 - `wiki/` — GitHub Wiki (git submodule), editable via Obsidian or any markdown editor
 
@@ -83,16 +90,16 @@ When completing a feature, fixing a bug, or making an architectural decision:
 ### Local Development
 ```bash
 pip install -e .                              # Install package (requires Python 3.11+)
-python adapters/mimic/load_bronze.py          # Bronze: ingest NDJSON → DuckDB
-python pipeline/validate_bronze.py            # Validate bronze layer
+python ingestion/load_bronze.py --source mimic-iv  # Bronze: ingest FHIR → DuckDB
+python ingestion/validate_bronze.py           # Validate bronze layer
 python pipeline/build_silver/apply_views.py   # Silver: flatten vitals via SQL
 cd models && sqlmesh plan --auto-apply        # Gold: run SQLMesh transformations
 ```
 
 ### Docker (full pipeline)
 ```bash
-docker compose run ingest                     # Bronze ingestion + validation
-docker compose run transform_vitals_eda       # Silver flattening + Gold SQLMesh models
+docker compose run fhir-ingestion             # Bronze ingestion + validation
+docker compose run vitals-pipeline            # Silver flattening + Gold SQLMesh models
 ```
 
 ### Silver layer (alternative via flatquack)
@@ -111,7 +118,7 @@ python -m src.silver.loader run               # Both steps
 
 ### Pipeline Stages
 
-1. **Bronze** (`adapters/mimic/load_bronze.py`): Reads NDJSON and Bundle JSON files into `bronze.fhir_resources` DuckDB table. Handles both flat NDJSON and nested Bundle entries via `unnest()`.
+1. **Bronze** (`ingestion/load_bronze.py`): Reads NDJSON and Bundle JSON files into `bronze.fhir_resources` DuckDB table. Detects format by extension, supports `--source` CLI arg for dataset tagging. Handles both flat NDJSON and nested Bundle entries.
 
 2. **Silver** (`pipeline/build_silver/`): SQL scripts in `pipeline/build_silver/sql/` extract 6 vital signs (HR, Temp, RR, SpO2, BP sys/dia) from FHIR Observations using LOINC codes. Creates `silver.obs_vitals` table via `json_extract_string()` parsing.
 
@@ -136,7 +143,7 @@ wiki/              → GitHub Wiki submodule (Obsidian vault)
 ## Testing
 
 No formal test framework. Validation is done via:
-- `pipeline/validate_bronze.py` — Checks row counts, required columns, null rates (<5%)
+- `ingestion/validate_bronze.py` — Checks row counts, required columns, null rates (<5%)
 - Jupyter notebooks in `notebooks/` — EDA and pipeline verification
 
 ## Git Workflow

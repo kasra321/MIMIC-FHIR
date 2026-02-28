@@ -3,7 +3,7 @@ FROM python:3.11-slim
 RUN pip install --no-cache-dir duckdb sqlmesh[duckdb] pyarrow
 
 WORKDIR /app
-COPY ./adapters /app/adapters
+COPY ./ingestion /app/ingestion
 COPY ./pipeline /app/pipeline
 COPY ./models /app/models
 COPY ./run_pipeline.sh /app/run_pipeline.sh

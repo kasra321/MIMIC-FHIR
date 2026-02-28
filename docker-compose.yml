@@ -1,13 +1,13 @@
 services:
-  ingest:
+  fhir-ingestion:
     build: .
-    entrypoint: ["/app/run_pipeline.sh", "ingest"]
+    entrypoint: ["/app/run_pipeline.sh", "fhir-ingestion"]
     volumes:
       - ./data/raw:/data/raw:ro
       - ./data/warehouse:/data/warehouse
 
-  transform_vitals_eda:
+  vitals-pipeline:
     build: .
-    entrypoint: ["/app/run_pipeline.sh", "transform_vitals_eda"]
+    entrypoint: ["/app/run_pipeline.sh", "vitals-pipeline"]
     volumes:
       - ./data/warehouse:/data/warehouse

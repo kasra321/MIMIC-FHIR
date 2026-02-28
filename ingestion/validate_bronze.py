@@ -1,4 +1,4 @@
-# pipeline/validate_bronze.py
+# ingestion/validate_bronze.py
 import duckdb
 import os
 import sys
@@ -16,7 +16,7 @@ if row_count == 0:
     errors.append("bronze.fhir_resources is empty")
 
 # 2. Required columns exist
-expected_cols = {"resource_type", "resource_id", "resource", "source_file"}
+expected_cols = {"resource_type", "resource_id", "resource", "source_file", "dataset_source"}
 actual_cols = {
     row[0]
     for row in con.execute(

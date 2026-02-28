@@ -1,4 +1,10 @@
 # pipeline/build_silver/apply_views.py
+#
+# Silver tables are materialized master reference tables (obs_vitals, future obs_labs, etc.).
+# They have a many-to-many relationship with downstream gold pipelines — each downstream
+# pipeline cluster (e.g. vitals-analytics, labs-qc) has an independent dev cycle starting
+# from these shared silver projections.
+
 import duckdb
 import os
 import glob
