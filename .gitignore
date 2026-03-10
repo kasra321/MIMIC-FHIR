@@ -11,6 +11,9 @@ ENV/
 htmlcov/
 .ipynb_checkpoints/
 
+# Java
+*.jar
+
 # Data and Databases
 data/
 *.ndjson
