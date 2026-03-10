@@ -1,0 +1,4 @@
+2026-03-08 21:36:47,758 - MainThread - numexpr.utils - INFO - NumExpr defaulting to 10 threads. (utils.py:161)
+2026-03-08 21:36:47,953 - MainThread - sqlmesh.core.config.connection - INFO - Creating new DuckDB adapter for data files: {'../data/warehouse/mimic_fhir.duckdb'} (connection.py:496)
+2026-03-08 21:36:48,299 - MainThread - sqlmesh.core.config.connection - INFO - Using existing DuckDB adapter due to overlapping data file: ../data/warehouse/mimic_fhir.duckdb (connection.py:486)
+2026-03-08 21:36:49,370 - MainThread - root - INFO - Shutting down the event dispatcher (dispatcher.py:159)

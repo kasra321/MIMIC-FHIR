@@ -1,0 +1,7 @@
+2026-02-24 13:25:55,193 - MainThread - numexpr.utils - INFO - NumExpr defaulting to 10 threads. (utils.py:161)
+2026-02-24 13:25:55,650 - MainThread - sqlmesh.core.config.connection - INFO - Creating new DuckDB adapter for data files: {'data/warehouse/mimic_fhir.duckdb'} (connection.py:496)
+2026-02-24 13:25:56,092 - MainThread - sqlmesh.core.config.connection - INFO - Using existing DuckDB adapter due to overlapping data file: data/warehouse/mimic_fhir.duckdb (connection.py:486)
+2026-02-24 13:25:56,117 - MainThread - sqlmesh.core.state_sync.db.migrator - INFO - Applying migration <module 'sqlmesh.migrations.v0000_baseline' from '/opt/anaconda3/lib/python3.13/site-packages/sqlmesh/migrations/v0000_baseline.py'> (migrator.py:185)
+2026-02-24 13:25:56,119 - MainThread - sqlmesh.core.engine_adapter.base - WARNING - Failed to create schema 'sqlmesh': IO Error: Cannot open file "/Users/kasra/Projects/MIMIC FHIR/models/data/warehouse/mimic_fhir.duckdb": No such file or directory (base.py:1419)
+2026-02-24 13:25:56,121 - MainThread - sqlmesh.core.state_sync.db.migrator - INFO - Starting migration rollback. (migrator.py:132)
+2026-02-24 13:25:56,128 - MainThread - root - INFO - Shutting down the event dispatcher (dispatcher.py:159)
