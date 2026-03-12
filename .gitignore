@@ -23,7 +23,7 @@ data/
 *.env
 
 # Generated artifacts
-sql/
+/sql/
 output/
 
 # OS
