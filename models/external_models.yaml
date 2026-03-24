@@ -1,6 +1,7 @@
 - name: silver.obs_vitals
   columns:
     resource_id: varchar
+    source: varchar
     patient_id: varchar
     encounter_id: varchar
     effective_datetime: timestamp

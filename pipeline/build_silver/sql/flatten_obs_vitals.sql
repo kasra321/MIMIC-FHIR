@@ -5,6 +5,7 @@
 CREATE OR REPLACE TABLE silver.obs_vitals AS
 SELECT
     r.resource_id,
+    json_extract_string(r.resource, '$.meta.source') AS source,
     regexp_replace(
         json_extract_string(r.resource, '$.subject.reference'),
         'Patient/', ''

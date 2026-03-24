@@ -37,6 +37,16 @@ for col in ("resource_id", "resource_type"):
     if null_rate > 0.05:
         errors.append(f"{col} null rate = {null_rate:.1%} (threshold: 5%)")
 
+# 4. meta.source populated in resource JSON
+meta_source_null = con.execute("""
+    SELECT COUNT(*) FROM bronze.fhir_resources
+    WHERE json_extract_string(resource, '$.meta.source') IS NULL
+""").fetchone()[0]
+if row_count > 0 and meta_source_null / row_count > 0.05:
+    errors.append(
+        f"meta.source null rate = {meta_source_null / row_count:.1%} (threshold: 5%)"
+    )
+
 con.close()
 
 if errors:

@@ -3,15 +3,23 @@ set -e
 
 case "${1:-}" in
   ingest)
-    echo "WARNING: This will rebuild the bronze layer from raw NDJSON files."
-    echo "         Any existing bronze data will be replaced."
-    read -p "Continue? [y/N] " confirm
-    if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
-      echo "Aborted."
-      exit 0
-    fi
     echo "--- BRONZE INGESTION ---"
-    python /app/adapters/mimic/load_bronze.py
+    # Load each source directory under /data/raw/
+    # Expected layout: /data/raw/mimic/, /data/raw/synthea_42/, etc.
+    found_source=false
+    for source_dir in /data/raw/*/; do
+      if [ -d "$source_dir" ]; then
+        source_name=$(basename "$source_dir")
+        echo "Loading source: $source_name from $source_dir"
+        python /app/pipeline/load_bronze.py --source "$source_name" --path "$source_dir" --replace
+        found_source=true
+      fi
+    done
+    if [ "$found_source" = false ]; then
+      echo "No source directories found under /data/raw/"
+      echo "Expected layout: /data/raw/<source_name>/ (e.g. /data/raw/mimic/)"
+      exit 1
+    fi
     echo "--- BRONZE VALIDATION ---"
     python /app/pipeline/validate_bronze.py
     ;;
@@ -26,7 +34,7 @@ case "${1:-}" in
     echo "Usage: run_pipeline.sh <pipeline>"
     echo ""
     echo "Available pipelines:"
-    echo "  ingest                Load raw NDJSON files into bronze layer"
+    echo "  ingest                Load FHIR files from /data/raw/<source>/ into bronze"
     echo "  transform_vitals_eda  Flatten vitals + build EDA models"
     exit 1
     ;;
