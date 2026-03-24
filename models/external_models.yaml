@@ -8,3 +8,44 @@
     loinc_code: varchar
     value: double
     unit: varchar
+
+- name: silver.patients
+  columns:
+    resource_id: varchar
+    source: varchar
+    gender: varchar
+    birth_date: date
+    deceased_datetime: timestamp
+    race: varchar
+    ethnicity: varchar
+
+- name: silver.encounters
+  columns:
+    resource_id: varchar
+    source: varchar
+    patient_id: varchar
+    encounter_class: varchar
+    status: varchar
+    period_start: timestamp
+    period_end: timestamp
+    type_code: varchar
+    type_display: varchar
+    type_system: varchar
+    reason_code: varchar
+    reason_display: varchar
+
+- name: silver.conditions
+  columns:
+    resource_id: varchar
+    source: varchar
+    patient_id: varchar
+    encounter_id: varchar
+    clinical_status: varchar
+    verification_status: varchar
+    category: varchar
+    code: varchar
+    code_system: varchar
+    code_display: varchar
+    onset_datetime: timestamp
+    abatement_datetime: timestamp
+    recorded_date: timestamp

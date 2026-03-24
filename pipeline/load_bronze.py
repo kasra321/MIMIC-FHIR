@@ -62,15 +62,13 @@ def build_bundle_select(file_path, source):
         '{filename}'                                    AS source_file
     FROM (
         SELECT json_merge_patch(
-            entry_resource::JSON,
+            e.resource::JSON,
             '{{"meta": {{"source": "{source}"}}}}'
         )::VARCHAR AS patched
         FROM (
-            SELECT unnest(
-                json_extract(content, '$.entry[*].resource')::VARCHAR[]
-            ) AS entry_resource
+            SELECT unnest(entry) AS e
             FROM read_json('{file_path}',
-                 format='unstructured', columns={{'content': 'JSON'}})
+                 format='auto', maximum_object_size=67108864)
         )
     )
     """
@@ -118,6 +116,7 @@ def main():
         sys.exit(0)
 
     con = duckdb.connect(args.db)
+    con.execute("SET memory_limit = '4GB';")
     con.execute("CREATE SCHEMA IF NOT EXISTS bronze;")
     con.execute("""
         CREATE TABLE IF NOT EXISTS bronze.fhir_resources (
@@ -129,14 +128,16 @@ def main():
     """)
 
     if args.replace:
-        deleted = con.execute(f"""
+        con.execute(f"""
             DELETE FROM bronze.fhir_resources
             WHERE json_extract_string(resource, '$.meta.source') = '{args.source}'
-        """).fetchone()
+        """)
         print(f"  Deleted existing rows for source '{args.source}'")
 
     union_sql = " UNION ALL ".join(selects)
-    con.execute(f"INSERT INTO bronze.fhir_resources {union_sql}")
+    con.execute(f"""INSERT INTO bronze.fhir_resources
+        (resource_type, resource_id, resource, source_file)
+        {union_sql}""")
 
     row_count = con.execute(
         "SELECT COUNT(*) FROM bronze.fhir_resources"
