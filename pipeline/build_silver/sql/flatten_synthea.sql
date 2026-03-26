@@ -113,3 +113,135 @@ SELECT
 FROM 
   bronze.synthea
 WHERE resource_type='Medication';
+
+-- 7. Allergy Intolerance
+CREATE OR REPLACE TABLE silver.synthea_allergy_intolerance AS
+SELECT
+  resource->>'id' AS resource_id,
+  resource->'clinicalStatus'->'coding'->0->>'code' AS clinical_status,
+  resource->'verificationStatus'->'coding'->0->>'code' AS verification_status,
+  resource->>'type' AS type,
+  resource->'category'->>0 AS category,
+  resource->>'criticality' AS criticality,
+  resource->'code'->'coding'->0->>'code' AS allergy_code,
+  regexp_replace(resource->'code'->'coding'->0->>'display', ' \((.*?)\)', '') AS allergy,
+  regexp_extract(resource->'code'->'coding'->0->>'display', '\((.*?)\)', 1) AS allergy_type,
+  regexp_replace(resource->'patient'->>'reference', 'urn:uuid:', '') AS patient_id,
+  (resource->>'recordedDate')::TIMESTAMP AS recorded_date
+FROM
+  bronze.synthea
+WHERE resource_type='AllergyIntolerance';
+
+-- 8. CarePlan
+CREATE OR REPLACE TABLE silver.synthea_careplan AS
+SELECT
+  resource->>'id' AS resource_id,
+  resource->>'status' AS status,
+  resource->>'intent' AS intent,
+  resource->'category'->0->'coding'->0->>'code' AS plan,
+  resource->'category'->1->'coding'->0->>'code' AS category_code,
+  regexp_replace(resource->'category'->1->'coding'->0->>'display', ' \((.*?)\)', '') AS category,
+  regexp_extract(resource->'category'->1->'coding'->0->>'display', '\((.*?)\)', 1) AS category_type,
+  regexp_replace(resource->'subject'->>'reference', 'urn:uuid:', '') AS patient_id,
+  regexp_replace(resource->'encounter'->>'reference', 'urn:uuid:', '') AS encounter_id,
+  (resource->'period'->>'start')::TIMESTAMP AS start_timestamp,
+  regexp_replace(resource->'careTeam'->0->>'reference', 'urn:uuid:', '') AS careteam_id,
+  resource->'activity'->0->'detail'->'code'->'coding'->0->>'code' AS activity_code,
+  regexp_replace(resource->'activity'->0->'detail'->'code'->'coding'->0->>'display', ' \((.*?)\)', '') AS activity,
+  regexp_extract(resource->'activity'->0->'detail'->'code'->'coding'->0->>'display', '\((.*?)\)', 1) AS activity_type,
+  resource->'activity'->0->'detail'->>'status' AS activity_status,
+  resource->'activity'->0->'detail'->'location'->>'display' AS activity_location,
+FROM
+  bronze.synthea
+WHERE resource_type='CarePlan';
+
+-- 9. CareTeam
+CREATE OR REPLACE TABLE silver.synthea_careteam AS
+SELECT
+  resource->>'id' AS resource_id,
+  resource->>'status' AS status,
+  regexp_replace(resource->'subject'->>'reference', 'urn:uuid:', '') AS patient_id,
+  resource->'participant'->0->'member'->>'display' AS patient_name,
+  regexp_replace(resource->'encounter'->>'reference', 'urn:uuid:', '') AS encounter_id,
+  (resource->'period'->>'start')::TIMESTAMP AS start_timestamp,
+  split_part(resource->'participant'->1->'member'->>'reference', '|', 2) AS pactitioner_id,
+  resource->'participant'->1->'member'->>'display' AS practitioner,
+  split_part(resource->'participant'->2->'member'->>'reference', '|', 2) AS organization_id,
+  resource->'participant'->1->'member'->>'display' AS organization,
+  resource->'reasonCode'->0->'coding'->0->>'code' AS reason_code,
+  regexp_replace(resource->'reasonCode'->0->'coding'->0->>'display', ' \((.*?)\)', '') AS reason,
+  regexp_extract(resource->'reasonCode'->0->'coding'->0->>'display', '\((.*?)\)', 1) AS reason_type,
+FROM 
+  bronze.synthea
+WHERE resource_type='CareTeam';
+
+-- 10. Medication Administration
+CREATE OR REPLACE TABLE silver.synthea_medication_administration AS
+SELECT
+  resource->>'id' AS resource_id,
+  resource->>'status' AS status,
+  resource->'medicationCodeableConcept'->'coding'->0->>'code' AS medication_code,
+  resource->'medicationCodeableConcept'->'coding'->0->>'display' AS medication,
+  regexp_replace(resource->'subject'->>'reference', 'urn:uuid:', '') AS patient_id,
+  regexp_replace(resource->'context'->>'reference', 'urn:uuid:', '') AS context_id,
+  (resource->>'effectiveDateTime')::TIMESTAMP AS effective_timestamp,
+  CASE WHEN regexp_replace(resource->'reasonReference'->0->>'reference', 'urn:uuid:', '') IS NOT NULL
+    THEN regexp_replace(resource->'reasonReference'->0->>'reference', 'urn:uuid:', '')
+    ELSE resource->'reasonCode'->0->'coding'->0->>'code' END
+  AS reason_id,
+  CASE WHEN regexp_replace(resource->'reasonReference'->0->>'display', ' \((.*?)\)', '') IS NOT NULL
+    THEN regexp_replace(resource->'reasonReference'->0->>'display', ' \((.*?)\)', '')
+    ELSE regexp_replace(resource->'reasonCode'->0->'coding'->0->>'display', '\((.*?)\)', '') END
+  AS reason,
+  CASE WHEN regexp_extract(resource->'reasonReference'->0->>'display', '\((.*?)\)', 1) IS NOT NULL
+    THEN regexp_extract(resource->'reasonReference'->0->>'display', '\((.*?)\)', 1) 
+    ELSE regexp_extract(resource->'reasonCode'->0->'coding'->0->>'display', '\((.*?)\)', 1) END
+  AS reason_type,
+FROM
+  bronze.synthea
+WHERE
+  resource_type='MedicationAdministration';
+
+-- 11. Medication Request
+CREATE OR REPLACE TABLE silver.synthea_medication_request AS
+SELECT
+  resource->>'id' AS resource_id,
+  resource->>'status' AS status,
+  resource->>'intent' AS intent,
+  resource->'category'->0->'coding'->0->>'code' AS category,
+  CASE WHEN regexp_replace(resource->'medicationReference'->>'reference', 'urn:uuid:', '') IS NOT NULL
+    THEN regexp_replace(resource->'medicationReference'->>'reference', 'urn:uuid:', '')
+    ELSE resource->'medicationCodeableConcept'->'coding'->0->>'code' END
+    AS medication_id,
+  regexp_replace(resource->'subject'->>'reference', 'urn:uuid:', '') AS patient_id,
+  regexp_replace(resource->'encounter'->>'reference', 'urn:uuid:', '') AS encounter_id,
+  (resource->>'authoredOn')::TIMESTAMP AS authored_on,
+  split_part(resource->'requester'->>'reference', '|', 2) AS practitioner_id,
+  resource->'requester'->>'display' AS practitioner,
+  regexp_replace(resource->'reasonReference'->0->>'reference', 'urn:uuid:', '') AS reason_id,
+  regexp_replace(resource->'reasonReference'->0->>'display', ' \((.*?)\)', '') AS reason,
+  regexp_extract(resource->'reasonReference'->0->>'display', '\((.*?)\)', 1) AS reason_type
+FROM
+  bronze.synthea
+WHERE resource_type='MedicationRequest';
+
+-- 12. Procedure
+CREATE OR REPLACE TABLE silver.synthea_procedure AS
+SELECT
+  resource->>'id' AS resource_id,
+  resource->>'status' AS status,
+  resource->'code'->'coding'->0->>'code' AS procedure_code,
+  regexp_replace(resource->'code'->'coding'->0->>'display', ' \((.*?)\)', '') AS reason,
+  regexp_extract(resource->'code'->'coding'->0->>'display', '\((.*?)\)', 1) AS reason_type,
+  regexp_replace(resource->'subject'->>'reference', 'urn:uuid:', '') as patient_id,
+  regexp_replace(resource->'encounter'->>'reference', 'urn:uuid:', '') AS encounter,
+  (resource->'performedPeriod'->>'start')::TIMESTAMP AS start_timestamp,
+  (resource-> 'performedPeriod'->>'end')::TIMESTAMP AS end_timpstamp,
+  resource->'code'->'coding'->0->>'code' AS procedure_code,
+  regexp_replace(resource->'code'->'coding'->0->>'display', ' \((.*?)\)', '') AS procedure,
+  regexp_extract(resource->'code'->'coding'->0->>'display', '\((.*?)\)', 1) AS procedure_type,
+  split_part(resource->'location'->>'reference', '|', 2) AS location_id,
+  resource->'location'->>'display' AS name
+FROM 
+  bronze.synthea
+WHERE resource_type='Procedure';
