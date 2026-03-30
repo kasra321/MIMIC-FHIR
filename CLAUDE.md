@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-MIMIC-FHIR-MDS is a medallion-architecture data pipeline that transforms MIMIC-IV FHIR NDJSON data into analysis-ready tables using DuckDB. It processes ~15GB of raw FHIR resources through Bronze (raw ingestion) → Silver (flattened vitals) → Gold (SQLMesh analytical models).
+MIMIC-FHIR-MDS is a medallion-architecture data pipeline that transforms MIMIC-IV and Synthea FHIR data into analysis-ready tables using DuckDB, focused on healthcare utilization comparison. Bronze (raw ingestion) → Silver (patients, encounters, conditions + additional entity tables) → Gold (SQLMesh utilization models).
 
 ## Structure
 
