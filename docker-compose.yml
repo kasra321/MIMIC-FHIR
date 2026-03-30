@@ -6,6 +6,19 @@ services:
       - ./data/raw:/data/raw:ro
       - ./data/warehouse:/data/warehouse
 
+  ingest_synthea:
+    build:
+      context: .
+      dockerfile: ./synthea/Dockerfile
+    entrypoint: ["/app/run_pipeline.sh", "ingest_synthea"]
+    command: ["200"]
+    environment:
+      - DUCKDB_PATH=/data/warehouse/mimic_fhir.duckdb
+      - SYNTHEA_DATA_PATH=/app/output
+    volumes:
+      - ./data/warehouse:/data/warehouse
+      - ./data/synthea:/app/output
+
   transform_vitals_eda:
     build: .
     entrypoint: ["/app/run_pipeline.sh", "transform_vitals_eda"]

@@ -23,6 +23,12 @@ case "${1:-}" in
     echo "--- BRONZE VALIDATION ---"
     python /app/pipeline/validate_bronze.py
     ;;
+  ingest_synthea)
+    echo "--- GENERATE SYNTHEA ---"
+    java -jar synthea-with-dependencies.jar -p $2
+    echo "--- SYNTHEA INGESTION ---"
+    python /app/adapters/synthea/load_synthea.py
+    ;;
   transform_vitals_eda)
     echo "--- SILVER: FLATTEN VIEWS ---"
     python /app/pipeline/build_silver/apply_views.py
@@ -35,6 +41,7 @@ case "${1:-}" in
     echo ""
     echo "Available pipelines:"
     echo "  ingest                Load FHIR files from /data/raw/<source>/ into bronze"
+    echo "  ingest_synthea        Load generated patient data into bronze layer"
     echo "  transform_vitals_eda  Flatten vitals + build EDA models"
     exit 1
     ;;
