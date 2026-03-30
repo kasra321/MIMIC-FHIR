@@ -6,7 +6,7 @@ CREATE OR REPLACE TABLE silver.patients AS
 WITH base AS (
     SELECT
         r.resource_id,
-        COALESCE(json_extract_string(r.resource, '$.meta.source'), r.dataset_source) AS source,
+        json_extract_string(r.resource, '$.meta.source') AS source,
         json_extract_string(r.resource, '$.gender') AS gender,
         TRY_CAST(json_extract_string(r.resource, '$.birthDate') AS DATE) AS birth_date,
         TRY_CAST(json_extract_string(r.resource, '$.deceasedDateTime') AS TIMESTAMP) AS deceased_datetime,

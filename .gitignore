@@ -26,6 +26,10 @@ data/
 /sql/
 output/
 
+# SQLMesh runtime artifacts
+models/.cache/
+models/logs/
+
 # OS
 .DS_Store
 .DS_Store?

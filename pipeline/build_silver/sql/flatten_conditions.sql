@@ -4,7 +4,7 @@
 CREATE OR REPLACE TABLE silver.conditions AS
 SELECT
     r.resource_id,
-    COALESCE(json_extract_string(r.resource, '$.meta.source'), r.dataset_source) AS source,
+    json_extract_string(r.resource, '$.meta.source') AS source,
     regexp_replace(
         json_extract_string(r.resource, '$.subject.reference'),
         '^(urn:uuid:|Patient/)', ''

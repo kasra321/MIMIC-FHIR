@@ -1,14 +1,3 @@
-- name: silver.obs_vitals
-  columns:
-    resource_id: varchar
-    source: varchar
-    patient_id: varchar
-    encounter_id: varchar
-    effective_datetime: timestamp
-    loinc_code: varchar
-    value: double
-    unit: varchar
-
 - name: silver.patients
   columns:
     resource_id: varchar
@@ -33,6 +22,12 @@
     type_system: varchar
     reason_code: varchar
     reason_display: varchar
+    admit_source: varchar
+    discharge_disposition: varchar
+    service_type: varchar
+    priority_code: varchar
+    parent_encounter_id: varchar
+    location_id: varchar
 
 - name: silver.conditions
   columns:
