@@ -12,6 +12,8 @@ dependencies = [
     "seaborn>=0.13.2",
     "python-dotenv>=1.2.2",
     "sqlmesh>=0.231.1",
+    "langchain>=1.2.14",
+    "langchain-core>=1.2.23",
 ]
 
 [dependency-groups]
