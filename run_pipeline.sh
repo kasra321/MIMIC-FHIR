@@ -28,6 +28,12 @@ case "${1:-}" in
     cd /app/models
     sqlmesh plan --auto-apply --no-prompts
     ;;
+  recommendation_pipe)
+    echo "--- GOLD: SQLMESH MODELS ---"
+    cd /app/models
+    sqlmesh migrate
+    sqlmesh plan --auto-apply --no-prompts
+    ;;
   *)
     echo "Usage: run_pipeline.sh <pipeline>"
     echo ""
