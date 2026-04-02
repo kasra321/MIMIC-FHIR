@@ -24,3 +24,9 @@ services:
     entrypoint: ["/app/run_pipeline.sh", "transform_vitals_eda"]
     volumes:
       - ./data/warehouse:/data/warehouse
+
+  recommendation_pipe:
+    build: .
+    entrypoint: ["/app/run_pipeline.sh", "recommendation_pipe"]
+    volumes:
+      - ./data/warehouse:/data/warehouse
