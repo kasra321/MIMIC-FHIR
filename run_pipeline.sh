@@ -29,7 +29,7 @@ case "${1:-}" in
     echo "--- SYNTHEA INGESTION ---"
     python /app/adapters/synthea/load_synthea.py
     ;;
-  transform_vitals_eda)
+  transform)
     echo "--- SILVER: FLATTEN VIEWS ---"
     python /app/pipeline/build_silver/apply_views.py
     echo "--- GOLD: SQLMESH MODELS ---"
@@ -42,7 +42,7 @@ case "${1:-}" in
     echo "Available pipelines:"
     echo "  ingest                Load FHIR files from /data/raw/<source>/ into bronze"
     echo "  ingest_synthea        Load generated patient data into bronze layer"
-    echo "  transform_vitals_eda  Flatten vitals + build EDA models"
+    echo "  transform             Flatten silver views + build SQLMesh gold models"
     exit 1
     ;;
 esac

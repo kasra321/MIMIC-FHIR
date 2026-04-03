@@ -44,3 +44,38 @@
     onset_datetime: timestamp
     abatement_datetime: timestamp
     recorded_date: timestamp
+
+- name: silver.procedure
+  columns:
+    resource_id: varchar
+    snomed_ct_id: varchar
+    snomed_ct_procedure: varchar
+    status: varchar
+    patient_id: varchar
+    encounter_id: varchar
+    performed_datetime: timestamp
+
+- name: silver.medication_dispense
+  columns:
+    resource_id: varchar
+    status: varchar
+    encounter_id: varchar
+    patient_id: varchar
+    medication_code: varchar
+    medication_name: varchar
+    handed_over_timestamp: timestamp
+
+- name: silver.location
+  columns:
+    resource_id: varchar
+    name: varchar
+    is_active: int
+    loaction_physical_type: varchar
+    organization_id: varchar
+
+- name: silver.organization
+  columns:
+    resource_id: varchar
+    name: varchar
+    is_active: varchar
+    npi_value: int
