@@ -30,7 +30,7 @@ output/
 
 # SQLMesh runtime artifacts
 models/.cache/
-models/.sqlmesh/
+.sqlmesh/
 models/logs/
 
 # OS
