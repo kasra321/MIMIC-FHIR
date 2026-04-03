@@ -9,7 +9,7 @@ import os
 import re
 import sys
 
-
+# loader args (source, path, db, replace)
 def parse_args():
     parser = argparse.ArgumentParser(description="Load FHIR resources into bronze layer")
     parser.add_argument("--source", required=True, help="Source name (e.g. mimic, synthea_42)")
