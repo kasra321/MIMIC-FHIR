@@ -16,8 +16,10 @@ htmlcov/
 
 # Data and Databases
 data/
+MIMIC IV ED raw/
 *.ndjson
 *.ndjson.gz
+*.zip
 *.duckdb
 *.duckdb.wal
 *.env
