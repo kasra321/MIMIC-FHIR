@@ -49,6 +49,9 @@ Thumbs.db
 *.swo
 .cursor/
 
+# Claude Code
+.claude/
+
 
 # Local scratch space
 local/*
