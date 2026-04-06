@@ -50,6 +50,8 @@ Thumbs.db
 
 # Claude Code
 .claude/
+CLAUDE.md
+.mcp.json
 
 
 # Local scratch space
