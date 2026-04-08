@@ -37,10 +37,10 @@ case "${1:-}" in
     sqlmesh plan --auto-apply --no-prompts
     ;;
   recommendation_pipe)
-    echo "--- GOLD: SQLMESH MODELS ---"
+    echo "--- GOLD: BUILD RECOMMENDATION TABLES ---"
     cd /app/models
     sqlmesh migrate
-    sqlmesh plan --auto-apply --no-prompts
+    sqlmesh plan --auto-apply --no-prompts --select-model "recommend.*"
     ;;
   *)
     echo "Usage: run_pipeline.sh <pipeline>"
@@ -49,6 +49,7 @@ case "${1:-}" in
     echo "  ingest                Load FHIR files from /data/raw/<source>/ into bronze"
     echo "  ingest_synthea        Load generated patient data into bronze layer"
     echo "  transform_vitals_eda  Flatten vitals + build EDA models"
+    echo "  recommndation pipe    Builds tables needed for patient similarity use case"
     exit 1
     ;;
 esac
