@@ -32,6 +32,9 @@ output/
 models/.cache/
 .sqlmesh/
 models/logs/
+models/models/logs/
+.cache/
+logs/
 
 # OS
 .DS_Store
