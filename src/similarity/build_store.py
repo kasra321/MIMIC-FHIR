@@ -13,18 +13,15 @@ import numpy as np
 from duckdb import DuckDBPyConnection
 from typing import List, Literal
 from pathlib import Path
-from dotenv import load_dotenv
 
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 
-load_dotenv()
-base = Path(__file__).resolve().parent.parent.parent
-DUCKDB_PATH = base / os.environ.get("DUCKDB_PATH")
+DUCKDB_PATH = os.environ.get("DUCKDB_PATH")
 EMBED_MODEL = os.environ.get("EMBED_MODEL")
-VECSTORE_PATH = base / os.environ.get("VECSTORE_PATH")
+VECSTORE_PATH = os.environ.get("VECSTORE_PATH")
 SOURCE_CONFIG = {
   "mimic": [("mi_patient", "mi_condition", "mimic")],
   "synthea": [("syn_patient", "syn_condition", "synthea")],
@@ -257,7 +254,7 @@ def generate_docs(
   prefix = "mi_" if doc_type == "mimic" else "syn_"
   documents = []
   count = 0
-  ids = ids[:30] # TODO: Remove this
+
   print(f"[INGEST] Generating {len(ids)} documents...")
   for id in ids:
     count += 1
@@ -305,10 +302,8 @@ def generate_docs(
     )
     documents.append(doc)
 
-    # TODO: Remove this
-    if count % 10 == 0:
+    if count % 100 == 0:
       print(f"   {count}/{len(ids)} documents processed")
-      print(doc)
   
   print(f"[INGEST] Loaded {len(documents)} patient documents")
   return documents
@@ -343,14 +338,10 @@ def build_vectorstore(
   for tab1, tab2, dtype in config:
     ids = get_relevant_ids(con, tab1, tab2)
     docs += generate_docs(con, ids, dtype)
-  
-  # ---- Building the components --------------
-  chunks = splitter.split_documents(docs)
-  print(f"[VECSTORE] Split into {len(chunks)} chunks")
 
   print(f"[VECSTORE] Creating vectorstore...")
   vectorestore = Chroma.from_documents(
-    documents=chunks,
+    documents=docs,
     embedding=embeddings,
     persist_directory=VECSTORE_PATH,
     collection_name="patient_info"
