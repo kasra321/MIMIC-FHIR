@@ -43,7 +43,7 @@ ABSTRACTS:
 {batch_text}
 """
 
-FIELDS = ["transforms", "outcomes", "diseases"]
+FIELDS = ["methodology", "outcomes", "diseases"]
 
 
 # ---------------------------------------------------------------------------
@@ -158,12 +158,12 @@ def embed(
 ) -> dict[str, np.ndarray]:
     """Per-field embeddings with disk cache.
 
-    Returns dict with keys: "transforms", "outcomes", "diseases", "combined".
+    Returns dict with keys: "methodology", "outcomes", "diseases", "combined".
     Each value is an (N, D) or (N, 3*D) array.
     """
     if cache_path.exists():
         cached = dict(np.load(cache_path))
-        if len(cached.get("transforms", [])) == len(df):
+        if len(cached.get("methodology", [])) == len(df):
             print(f"[EMBED] Cache hit: {cache_path}")
             for k in FIELDS:
                 print(f"  {k}: {cached[k].shape}")
@@ -174,7 +174,7 @@ def embed(
     model = SentenceTransformer(model_name)
 
     texts = {
-        "transforms": df["data_transforms"].apply(
+        "methodology": df["data_transforms"].apply(
             lambda x: ", ".join(x) if isinstance(x, list) else str(x)
         ).tolist(),
         "outcomes": df["outcome_metric"].fillna("").tolist(),
