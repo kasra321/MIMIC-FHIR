@@ -25,7 +25,9 @@ Data/*.ndjson  -->  Bronze (DuckDB)  -->  Silver (flat vitals)  -->  Gold (SQLMe
 ```bash
 # Docker (recommended)
 docker compose run ingest                     # Bronze ingestion + validation
+docker compose run ingest_synthea
 docker compose run transform_vitals_eda       # Silver + Gold pipeline
+docker compose run recommendation_pipe        # Patient similarity pipeline
 
 # Local
 pip install -e .
@@ -33,6 +35,13 @@ python adapters/mimic/load_bronze.py          # Bronze: ingest NDJSON -> DuckDB
 python pipeline/validate_bronze.py            # Validate bronze layer
 python pipeline/build_silver/apply_views.py   # Silver: flatten vitals
 cd models && sqlmesh plan --auto-apply        # Gold: run SQLMesh models
+python src/similarity/build_store.py          # Builds the patient document store
+```
+
+Running the patient recommender requires you have created the vectorestore
+
+```bash
+python src/similarity/query_store.py -q {query} -n {num_results}
 ```
 
 ## Project Structure
@@ -44,6 +53,7 @@ pipeline/build_silver/sql/         Silver SQL (source of truth)
 pipeline/build_silver/apply_views.py  Executes silver SQL
 specs/*.vd.json                    FHIR ViewDefinition specs (reference)
 models/                            SQLMesh gold layer
+src/                               Use case related scripts
 notebooks/                         EDA and analysis notebooks
 wiki/                              Documentation (git submodule)
 local/                             Untracked scratch space
@@ -57,3 +67,9 @@ Full documentation lives in the [project wiki](https://github.com/kasra321/MIMIC
 
 - `DUCKDB_PATH` — Path to DuckDB warehouse file (default in Docker: `/data/warehouse/mimic_fhir.duckdb`)
 - `RAW_DATA_PATH` — Directory containing raw NDJSON/JSON files
+
+For Patient Recommender
+
+- `EMBED_MODEL` — Embedding model used to vectorise patient documents
+- `VECSTORE_PATH` — Path to create vectorestore
+- `HF_API` — HuggingFace account API
