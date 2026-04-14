@@ -18,6 +18,8 @@ dependencies = [
     "langchain-chroma>=0.1.2",
     "langchain-huggingface>=1.2.1",
     "sentence-transformers>=5.3.0",
+    "google-genai>=1.0",
+    "metapub>=0.5",
 ]
 
 [dependency-groups]
