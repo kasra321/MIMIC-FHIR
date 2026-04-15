@@ -3,6 +3,9 @@ Query Document Vector Store
 ===========================
 Parse in a patients documents or a query to the searchable ChromaDB
 vectorestore and retrieve patient documents
+
+Components:
+- query_store: Allows user to ask questions about patients to retrieve relevant documents
 """
 import os
 from langchain_huggingface import HuggingFaceEmbeddings

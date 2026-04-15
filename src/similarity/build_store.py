@@ -1,11 +1,14 @@
 """
 Build Document Vector Store
 ===========================
-Convert a raw text documents of patient information into searchable
-ChromaDB vector store.
+Convert a raw text documents of patient information into searchable ChromaDB vector store.
 
 Components:
-- 
+- get_relevant_ids:                Gets only the patient_ids that have patient details in the table
+- create_mimic_patient_document:   Creates a patient view from MIMIC data
+- create_synthea_patient_document: Creates a patient view from Synthea data
+- generate_data:                   Unified document creation function for both mimic and synthea based data
+- build_vectorestore:              Creates the vectorstore of documents for querying
 """
 import os
 import duckdb
