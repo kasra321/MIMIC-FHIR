@@ -59,6 +59,14 @@ wiki/                              Documentation (git submodule)
 local/                             Untracked scratch space
 ```
 
+## Notebooks
+
+- `data_profiling_harmonization`:
+- `healthcare_utilization_demo`:
+- `patient_recommender`: Workspace for the patient similarity pipeline. Sample code snippets that made it into the final scripts.
+- `pipeline_test`:
+- `table_exploration`: Explores the different structure and content of MIMIC and Synthea data
+
 ## Documentation
 
 Full documentation lives in the [project wiki](https://github.com/kasra321/MIMIC-FHIR/wiki), also available locally at `wiki/` (git submodule, Obsidian-compatible).
