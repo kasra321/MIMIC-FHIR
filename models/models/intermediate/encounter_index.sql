@@ -1,5 +1,5 @@
 MODEL (
-  name intermediate.ed_index_cohort,
+  name intermediate.encounter_index,
   kind FULL,
   grain [encounter_id]
 );
@@ -21,5 +21,4 @@ FROM silver.encounters e
 JOIN silver.patients p
   ON e.patient_id = p.resource_id
  AND e.source = p.source
-WHERE e.encounter_class = 'EMER'
-  AND e.status = 'finished'
+WHERE e.status = 'finished'

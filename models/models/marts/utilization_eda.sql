@@ -30,7 +30,7 @@ SELECT
     COALESCE(cb.chronic_conditions, 0) AS chronic_conditions,
     COALESCE(cb.encounter_diagnoses, 0) AS encounter_diagnoses,
     COALESCE(cb.distinct_diagnosis_codes, 0) AS distinct_diagnosis_codes
-FROM intermediate.ed_index_cohort idx
+FROM intermediate.encounter_index idx
 LEFT JOIN intermediate.utilization_history uh
   ON uh.index_encounter_id = idx.encounter_id
 LEFT JOIN intermediate.condition_burden cb

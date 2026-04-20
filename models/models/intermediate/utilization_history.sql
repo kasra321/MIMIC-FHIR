@@ -10,7 +10,7 @@ WITH prior_encounters AS (
         e.encounter_class,
         e.period_start AS prior_start,
         DATE_DIFF('month', e.period_start, idx.period_start) AS months_before
-    FROM intermediate.ed_index_cohort idx
+    FROM intermediate.encounter_index idx
     JOIN silver.encounters e
       ON e.patient_id = idx.patient_id
      AND e.source = idx.source

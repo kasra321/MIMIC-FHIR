@@ -14,7 +14,7 @@ SELECT
         WHERE c.category = 'encounter-diagnosis'
     ) AS encounter_diagnoses,
     COUNT(DISTINCT c.code) AS distinct_diagnosis_codes
-FROM intermediate.ed_index_cohort idx
+FROM intermediate.encounter_index idx
 LEFT JOIN silver.conditions c
   ON c.patient_id = idx.patient_id
  AND c.source = idx.source
