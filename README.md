@@ -1,71 +1,96 @@
 # MIMIC-FHIR Modern Data Stack
 
-A medallion architecture pipeline that transforms MIMIC-IV FHIR NDJSON data into analysis-ready tables using DuckDB.
+A source-agnostic medallion architecture that transforms clinical FHIR data into analysis-ready tables using DuckDB and SQLMesh. Supports MIMIC-IV and Synthea out of the box.
 
 ## Architecture
 
 ```
-Data/*.ndjson  -->  Bronze (DuckDB)  -->  Silver (flat vitals)  -->  Gold (SQLMesh)  -->  Notebooks / BI
-  15 GB              1.0 GB               obs_vitals                vitals_wide, vitals_eda
+FHIR sources          Bronze            Silver               Gold (SQLMesh)         Consumers
+─────────────       ──────────       ──────────────       ───────────────────      ────────────
+MIMIC-IV NDJSON ┐   fhir_resources   patients             encounter_index     ┌─> FastAPI
+Synthea Bundles ┘                    encounters            utilization_history │   Notebooks
+                                     conditions            condition_burden    │   BI tools
+                                     obs_vitals      ───>  utilization_eda  ──┘
+                                     procedures            recommend (10 models)
+                                     medications
 ```
 
-- **Bronze** — Ingests raw FHIR NDJSON resources into `bronze.fhir_resources` in DuckDB
-- **Silver** — Flattens FHIR Observations into `silver.obs_vitals` via hand-written SQL (LOINC-filtered vital signs)
-- **Gold** — SQLMesh models pivot vitals wide and add temporal features (delta times, encounter phases)
+- **Bronze** — Ingests raw FHIR NDJSON and JSON Bundle resources into `bronze.fhir_resources`, tagging each with `meta.source` for lineage
+- **Silver** — Flattens FHIR resources into relational tables (patients, encounters, conditions, vitals, procedures, medications, locations, organizations)
+- **Gold** — SQLMesh models compute utilization analytics (encounter index, lookback history, condition burden) and patient-recommendation feature tables
 
 ## Prerequisites
 
 - Python 3.11+
 - Docker (for containerized pipeline)
-- Node.js (optional, for `npx flatquack` reference SQL generation)
-- MIMIC-IV FHIR NDJSON files in `data/raw/`
+- MIMIC-IV FHIR NDJSON files in `data/raw/mimic/` (and/or Synthea bundles in `data/raw/synthea/`)
 
 ## Quick Start
 
 ```bash
 # Docker (recommended)
-docker compose run ingest                     # Bronze ingestion + validation
-docker compose run ingest_synthea
-docker compose run transform_vitals_eda       # Silver + Gold pipeline
-docker compose run recommendation_pipe        # Patient similarity pipeline
+docker compose run ingest                  # Bronze: load all sources + validate
+docker compose run ingest_synthea          # Generate and load Synthea patients
+docker compose run transform_vitals_eda    # Silver flattening + Gold SQLMesh models
+docker compose run recommendation_pipe     # Build recommend tables
 
 # Local
 pip install -e .
-python adapters/mimic/load_bronze.py          # Bronze: ingest NDJSON -> DuckDB
-python pipeline/validate_bronze.py            # Validate bronze layer
-python pipeline/build_silver/apply_views.py   # Silver: flatten vitals
-cd models && sqlmesh plan --auto-apply        # Gold: run SQLMesh models
-python src/similarity/build_store.py          # Builds the patient document store
-```
+python pipeline/load_bronze.py --source mimic --path data/raw/mimic/
+python pipeline/validate_bronze.py
+python pipeline/build_silver/apply_views.py
+sqlmesh plan --auto-apply                  # Gold models
 
-Running the patient recommender requires you have created the vectorestore
-
-```bash
-python src/similarity/query_store.py -q {query} -n {num_results}
+# API
+uvicorn api.main:app                       # Starts on http://localhost:8000
 ```
 
 ## Project Structure
 
 ```
-adapters/mimic/load_bronze.py      Source-specific NDJSON -> DuckDB ingestion
-pipeline/validate_bronze.py        Bronze validation gate
-pipeline/build_silver/sql/         Silver SQL (source of truth)
-pipeline/build_silver/apply_views.py  Executes silver SQL
-specs/*.vd.json                    FHIR ViewDefinition specs (reference)
-models/                            SQLMesh gold layer
-src/                               Use case related scripts
-notebooks/                         EDA and analysis notebooks
+pipeline/
+  load_bronze.py                   FHIR NDJSON/Bundle -> DuckDB ingestion
+  validate_bronze.py               Bronze validation gate
+  build_silver/sql/                Silver SQL (8 flattening scripts)
+  build_silver/apply_views.py      Executes silver SQL
+
+adapters/synthea/                  Synthea-specific ingestion
+
+models/models/
+  intermediate/                    encounter_index, utilization_history, condition_burden
+  marts/                           utilization_eda (denormalized analytics fact table)
+  recommend/                       10 feature tables (mi_* + syn_*) for patient similarity
+
+api/                               FastAPI read-only API over the gold layer
+  routers/utilization.py           4 endpoints: list, stats, patient, encounter
+
+src/
+  utilization/analytics.py         Visualization module (charts, summaries)
+  similarity/build_store.py        ChromaDB vector store for patient search
+  pubmed/clustering.py             PubMed redundancy analysis via embeddings
+
+notebooks/
+  healthcare_utilization_demo      Dashboard over the API (zero SQL)
+  data_profiling_harmonization     MIMIC vs Synthea harmonization analysis
+  pubmed_redundancy_analysis       Literature redundancy clustering
+
 wiki/                              Documentation (git submodule)
-local/                             Untracked scratch space
+run_pipeline.sh                    Docker entrypoint (ingest, transform, recommend)
+docker-compose.yml                 Multi-service orchestration
 ```
 
-## Notebooks
+## API
 
-- `data_profiling_harmonization`:
-- `healthcare_utilization_demo`:
-- `patient_recommender`: Workspace for the patient similarity pipeline. Sample code snippets that made it into the final scripts.
-- `pipeline_test`:
-- `table_exploration`: Explores the different structure and content of MIMIC and Synthea data
+The FastAPI server exposes the gold layer at `http://localhost:8000`:
+
+| Endpoint | Description |
+|---|---|
+| `GET /utilization` | List records with filters (source, gender, encounter_class, age range) |
+| `GET /utilization/stats` | Aggregate statistics grouped by source and encounter class |
+| `GET /utilization/patient/{id}` | All encounters for a patient |
+| `GET /utilization/{encounter_id}` | Single encounter detail |
+
+Interactive docs at `/docs` (Swagger UI).
 
 ## Documentation
 
@@ -73,11 +98,5 @@ Full documentation lives in the [project wiki](https://github.com/kasra321/MIMIC
 
 ## Environment Variables
 
-- `DUCKDB_PATH` — Path to DuckDB warehouse file (default in Docker: `/data/warehouse/mimic_fhir.duckdb`)
+- `DUCKDB_PATH` — Path to DuckDB warehouse file (default: `data/warehouse/mimic_fhir.duckdb`)
 - `RAW_DATA_PATH` — Directory containing raw NDJSON/JSON files
-
-For Patient Recommender
-
-- `EMBED_MODEL` — Embedding model used to vectorise patient documents
-- `VECSTORE_PATH` — Path to create vectorestore
-- `HF_API` — HuggingFace account API
