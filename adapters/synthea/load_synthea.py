@@ -1,4 +1,12 @@
-# adapters/synthea/load_synthea.py
+"""
+Generate and Load Synthea Data
+==============================
+Pipeline that takes all the generate Synthea JSON files (regardless of generated structure)
+and appends it to the bronze table in duckdb.
+
+Preserves the original FHIR structure to be later transformed into intermediate silver
+tables for more deliberate data massaging and ensures consistency as source-of-truth
+"""
 import duckdb
 import os
 import glob

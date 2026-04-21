@@ -28,5 +28,10 @@ services:
   recommendation_pipe:
     build: .
     entrypoint: ["/app/run_pipeline.sh", "recommendation_pipe"]
+    environment:
+      - DUCKDB_PATH=/data/warehouse/mimic_fhir.duckdb
+      - EMBED_MODEL=kamalkraj/BioSimCSE-BioLinkBERT-BASE
+      - VECSTORE_PATH=/data/vectorstore
     volumes:
       - ./data/warehouse:/data/warehouse
+      - ./data/vectorstore:/data/vectorstore

@@ -41,6 +41,8 @@ case "${1:-}" in
     cd /app/models
     sqlmesh migrate
     sqlmesh plan --auto-apply --no-prompts --select-model "recommend.*"
+    echo "--- BUILD VECTORSTORE ---"
+    python /app/src/similarity/build_store.py -d $2
     ;;
   *)
     echo "Usage: run_pipeline.sh <pipeline>"
@@ -49,7 +51,7 @@ case "${1:-}" in
     echo "  ingest                Load FHIR files from /data/raw/<source>/ into bronze"
     echo "  ingest_synthea        Load generated patient data into bronze layer"
     echo "  transform             Flatten silver views + build SQLMesh gold models"
-    echo "  recommndation pipe    Builds tables needed for patient similarity use case"
+    echo "  recommndation_pipe    Builds tables needed for patient similarity use case"
     exit 1
     ;;
 esac
