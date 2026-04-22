@@ -59,7 +59,7 @@ adapters/synthea/                  Synthea-specific ingestion
 models/models/
   intermediate/                    encounter_index, utilization_history, condition_burden
   marts/                           utilization_eda (denormalized analytics fact table)
-  recommend/                       10 feature tables (mi_* + syn_*) for patient similarity
+  recommend/                       10 feature tables for patient similarity
 
 api/                               FastAPI read-only API over the gold layer
   routers/utilization.py           4 endpoints: list, stats, patient, encounter
@@ -70,9 +70,11 @@ src/
   pubmed/clustering.py             PubMed redundancy analysis via embeddings
 
 notebooks/
+  table_exploration                Exploration of raw data formats
   healthcare_utilization_demo      Dashboard over the API (zero SQL)
   data_profiling_harmonization     MIMIC vs Synthea harmonization analysis
   pubmed_redundancy_analysis       Literature redundancy clustering
+  patient_recommender              Drafts of patient similarity system
 
 wiki/                              Documentation (git submodule)
 run_pipeline.sh                    Docker entrypoint (ingest, transform, recommend)
@@ -83,12 +85,12 @@ docker-compose.yml                 Multi-service orchestration
 
 The FastAPI server exposes the gold layer at `http://localhost:8000`:
 
-| Endpoint | Description |
-|---|---|
-| `GET /utilization` | List records with filters (source, gender, encounter_class, age range) |
-| `GET /utilization/stats` | Aggregate statistics grouped by source and encounter class |
-| `GET /utilization/patient/{id}` | All encounters for a patient |
-| `GET /utilization/{encounter_id}` | Single encounter detail |
+| Endpoint                          | Description                                                            |
+| --------------------------------- | ---------------------------------------------------------------------- |
+| `GET /utilization`                | List records with filters (source, gender, encounter_class, age range) |
+| `GET /utilization/stats`          | Aggregate statistics grouped by source and encounter class             |
+| `GET /utilization/patient/{id}`   | All encounters for a patient                                           |
+| `GET /utilization/{encounter_id}` | Single encounter detail                                                |
 
 Interactive docs at `/docs` (Swagger UI).
 
@@ -100,3 +102,6 @@ Full documentation lives in the [project wiki](https://github.com/kasra321/MIMIC
 
 - `DUCKDB_PATH` — Path to DuckDB warehouse file (default: `data/warehouse/mimic_fhir.duckdb`)
 - `RAW_DATA_PATH` — Directory containing raw NDJSON/JSON files
+- `EMBED_MODEL` — Hugging Face embedding model (default: `kamalkraj/BioSimCSE-BioLinkBERT-BASE`)
+- `VECSTORE_PATH` — Path to vectorstore
+- `HF_API` — Hugging Face personal key
