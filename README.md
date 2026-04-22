@@ -19,11 +19,19 @@ Synthea Bundles ┘                    encounters            utilization_history
 - **Silver** — Flattens FHIR resources into relational tables (patients, encounters, conditions, vitals, procedures, medications, locations, organizations)
 - **Gold** — SQLMesh models compute utilization analytics (encounter index, lookback history, condition burden) and patient-recommendation feature tables
 
+## Data Access
+
+This project uses [MIMIC-IV on FHIR v2.1](https://physionet.org/content/mimic-iv-fhir/2.1/) (Bennett et al., 2024), a restricted-access dataset on PhysioNet. License acquired by authors for academic use; data downloaded January 2026.
+
+Download the compressed NDJSON files (`*.ndjson.gz`) from the [dataset page](https://physionet.org/content/mimic-iv-fhir/2.1/) and place them in `data/raw/mimic/`.
+
+The dataset contains 30 FHIR profiles (24 for MIMIC-IV + 6 for MIMIC-IV-ED) sourced from MIMIC-IV v2.2 and MIMIC-IV-ED v2.2, with custom code systems and value sets derived from MIMIC terminology. See the [MIMIC-FHIR Implementation Guide](https://kind-lab.github.io/mimic-fhir/) for profile documentation.
+
 ## Prerequisites
 
 - Python 3.11+
 - Docker (for containerized pipeline)
-- MIMIC-IV FHIR NDJSON files in `data/raw/mimic/` (and/or Synthea bundles in `data/raw/synthea/`)
+- MIMIC-IV FHIR NDJSON files in `data/raw/mimic/` (see **Data Access** above) and/or Synthea bundles in `data/raw/synthea/`
 
 ## Quick Start
 
